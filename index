@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kanaka Space Task Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand+SC&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#f6d143;--orange:#fcb45f;--coral:#ff8078;--coral-deep:#f16a62;--peach:#ffd9cc;--bg:#fff;--cream:#fffaf4;--surface:#fff;--ink:#211710;--soft:#4a3c32;--line:rgba(33,23,16,.12);--badge:#7a3f2a;--ok:#2f9e66;--late:#d6453d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1210;--cream:#241a16;--surface:#2a1f1a;--ink:#fff4ea;--soft:#d2bfb2;--line:rgba(255,244,234,.15);--peach:#4a2c25;--badge:#ffd9cc;--ok:#52c68a;--late:#ff7a70}}
+:root[data-theme="dark"]{--bg:#1a1210;--cream:#241a16;--surface:#2a1f1a;--ink:#fff4ea;--soft:#d2bfb2;--line:rgba(255,244,234,.15);--peach:#4a2c25;--badge:#ffd9cc;--ok:#52c68a;--late:#ff7a70}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{color-scheme:light dark}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:'Plus Jakarta Sans',system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:22px 18px 60px}
+h1,h2{font-family:'Patrick Hand SC',cursive;font-weight:400;margin:0;letter-spacing:.3px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.top h1{font-size:32px}
+.btn{border:none;border-radius:100px;padding:11px 20px;font:600 14.5px 'Plus Jakarta Sans',sans-serif;cursor:pointer;background:var(--coral);color:#211710;transition:background .15s,transform .15s}
+.btn:hover{background:var(--coral-deep);transform:translateY(-1px)}
+.btn.ghost{background:transparent;border:1.5px solid var(--coral);color:var(--ink)}
+.btn.ghost:hover{background:var(--peach)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px}
+.prog-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.big{font-family:'Patrick Hand SC',cursive;font-size:44px;line-height:1}
+.big small{font-size:22px;color:var(--soft)}
+.msg{font-weight:600;font-size:14.5px;color:var(--soft)}
+.bar{height:16px;border-radius:100px;background:var(--peach);overflow:hidden;margin:14px 0 16px}
+.bar i{display:block;height:100%;width:0;border-radius:100px;background:linear-gradient(90deg,var(--gold),var(--orange) 50%,var(--coral));transition:width .5s ease}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat{background:var(--cream);border-radius:14px;padding:10px 6px;text-align:center}
+.stat b{display:block;font-size:22px;font-weight:800}
+.stat span{font-size:11.5px;color:var(--soft);font-weight:600}
+.stat.warn b{color:var(--late)}
+#formBox{display:none;margin-top:16px}
+#formBox.open{display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.full{grid-column:1/-1}
+label.f{display:block;font-size:12.5px;font-weight:700;color:var(--soft);margin-bottom:4px}
+input[type=text],input[type=date],input[type=number],input[type=email],input[type=password],select,textarea{width:100%;padding:11px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:500 15px 'Plus Jakarta Sans',sans-serif}
+textarea{resize:vertical;min-height:84px;line-height:1.5}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--coral)}
+input:disabled{opacity:.45}
+.ups{display:flex;gap:8px;flex-wrap:wrap}
+.chk{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:100px;border:1.5px solid var(--line);cursor:pointer;font-size:13.5px;font-weight:600;user-select:none}
+.chk.mini{padding:5px 10px;font-size:12px;margin-top:8px}
+.chk input{accent-color:var(--coral);width:16px;height:16px;margin:0}
+.chk:has(input:checked){border-color:var(--coral);background:var(--peach)}
+.form-actions{display:flex;gap:10px;margin-top:16px;align-items:center;flex-wrap:wrap}
+.form-actions .tot{margin-left:auto;font-weight:800;font-size:18px}
+.filters{display:flex;gap:8px;margin:22px 0 12px;flex-wrap:wrap}
+.fl{padding:8px 16px;border-radius:100px;border:1.5px solid var(--line);background:transparent;color:var(--ink);font:600 13.5px 'Plus Jakarta Sans',sans-serif;cursor:pointer}
+.fl.on{background:var(--coral);border-color:var(--coral);color:#211710}
+.fl[data-f="0"].on{background:var(--gold);border-color:var(--gold)}
+.fl[data-f="1"].on{background:var(--orange);border-color:var(--orange)}
+.fl[data-f="2"].on{background:var(--coral);border-color:var(--coral)}
+.order{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--orange);border-radius:16px;padding:14px 16px;margin-bottom:10px}
+.order.s0{border-left-color:var(--gold)}
+.order.s1{border-left-color:var(--orange)}
+.order.s2{border-left-color:var(--coral)}
+.order.late{border-left-color:var(--late)}
+.ob{flex:1;min-width:0}
+.oid{font-weight:800;font-size:13px;letter-spacing:.5px;color:var(--coral-deep)}
+.oid span{color:var(--soft);font-weight:600;letter-spacing:0;margin-left:8px}
+.nm{font-weight:700;font-size:16px;word-break:break-word}
+.sv{font-size:13.5px;color:var(--soft)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.chip{font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;background:var(--peach);color:var(--badge);white-space:nowrap}
+.chip.late{background:var(--late);color:#fff}
+.chip.today{background:var(--coral);color:#211710}
+.steps{display:flex;gap:6px;margin-top:10px}
+.st{flex:1;padding:8px 4px;border-radius:10px;border:1.5px solid var(--line);background:transparent;color:var(--soft);font:700 12px 'Plus Jakarta Sans',sans-serif;cursor:pointer}
+.st.past{background:var(--peach);border-color:var(--peach);color:var(--badge)}
+.st[data-s="0"]{--sc:var(--gold)}
+.st[data-s="1"]{--sc:var(--orange)}
+.st[data-s="2"]{--sc:var(--coral)}
+.st.cur{background:var(--sc);border-color:var(--sc);color:#211710}
+.right{text-align:right;flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.rcb{border:1.5px solid var(--coral);background:transparent;color:var(--ink);font:700 12px 'Plus Jakarta Sans',sans-serif;padding:6px 12px;border-radius:100px;cursor:pointer}
+.rcb:hover{background:var(--peach)}
+.del{border:none;background:none;color:var(--soft);font:600 12px 'Plus Jakarta Sans',sans-serif;cursor:pointer;padding:4px 0}
+.del.sure{color:var(--late)}
+.note{white-space:pre-wrap;font-size:12.5px;color:var(--soft);margin-top:6px;font-style:italic}
+.empty{text-align:center;color:var(--soft);padding:36px 10px;font-size:14.5px}
+.ov{position:fixed;inset:0;background:rgba(33,23,16,.4);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);display:none;overflow:auto;padding:calc(24px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px));z-index:50}
+.ov.open{display:block}
+.xbtn{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:16px;width:42px;height:42px;border-radius:50%;border:none;background:#fffaf4;color:#211710;font-size:20px;line-height:1;cursor:pointer;z-index:51;box-shadow:0 4px 14px rgba(33,23,16,.25)}
+.xbtn:hover{background:#ffd9cc}
+.rcard{max-width:380px;margin:0 auto;background:#fffaf4;color:#211710;border-radius:24px;overflow:hidden}
+.rhead{background:#ff8078;padding:22px 22px 18px;text-align:center}
+.rhead h2{font-size:34px;color:#211710}
+.rhead p{margin:2px 0 0;font-size:13px;font-weight:600}
+.rbody{padding:20px 22px 22px}
+.rid{text-align:center;margin-bottom:12px}
+.rid small{display:block;font-size:11.5px;font-weight:700;color:#4a3c32}
+.rid b{font-size:24px;font-weight:800;letter-spacing:1.5px}
+.rrow{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px dashed rgba(33,23,16,.18);font-size:14px}
+.rrow span:first-child{color:#4a3c32}
+.rrow b{white-space:pre-wrap;word-break:break-word;min-width:0;text-align:right;font-weight:700}
+.rtot{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;padding:14px 16px;background:#ffd9cc;border-radius:14px}
+.rtot span{font-weight:700;font-size:14px}
+.rtot b{font-size:24px;font-weight:800}
+.rfoot{margin:14px 0 0;text-align:center;font-size:12px;color:#4a3c32}
+.ov-actions{max-width:380px;margin:14px auto 0;text-align:center;color:#fff;font-size:12.5px}
+.ov-actions .btn{margin-top:10px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.stats{gap:6px}.big{font-size:38px}.order{padding:12px}.top h1{font-size:26px}}
+html{-webkit-text-size-adjust:100%}
+button,.fl,.st,.chk{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.wrap{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px))}
+input[type=text],input[type=date],input[type=number],input[type=email],input[type=password],select,textarea{font-size:16px;min-height:46px}
+input[type=date]{-webkit-appearance:none;appearance:none;display:block}
+textarea{min-height:84px}
+.btn,.st,.rcb{min-height:44px}
+.del{padding:10px 4px}
+.btn:disabled{opacity:.6}
+.ov{padding-top:calc(64px + env(safe-area-inset-top,0px));overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.ov-actions{color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.ov-actions .btn{margin:10px 5px 0}
+.fab{display:none}
+@media(max-width:560px){
+.top .btn{display:none}
+.fab{display:block;position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;padding:14px 22px;box-shadow:0 8px 22px rgba(33,23,16,.28)}
+.wrap{padding-bottom:110px}
+.order{flex-direction:column;gap:10px}
+.order .right{flex-direction:row;width:100%;justify-content:space-between;align-items:center}
+.stat span{font-size:10.5px}
+.form-actions .btn{flex:1}
+.form-actions .tot{order:-1;width:100%;margin:0 0 2px;text-align:right}
+.fl{padding:9px 13px;font-size:13px}
+}
+body{overflow-x:hidden}
+input[type=date]{min-width:0;text-align:left}
+.st{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(hover:none){.btn:hover,.rcb:hover{transform:none}}
+@media(max-width:560px){.st{font-size:11.5px;padding:8px 2px}.chips{gap:5px}.oid span{display:block;margin:2px 0 0}}
+@media(max-width:380px){.st{font-size:10.5px}.big{font-size:34px}.wrap{padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}.card{padding:16px}}
+body.fo .fab{display:none}
+.rstat{margin:2px 0 14px;padding:14px 10px 12px;border-radius:16px}
+.rstat small{display:block;text-align:center;font-size:10.5px;font-weight:800;letter-spacing:.9px;opacity:.75}
+.rpill{text-align:center;font-weight:800;font-size:15px;margin:2px 0 14px}
+.rsteps{display:flex}
+.rs{flex:1;text-align:center;position:relative;font-size:11.5px;font-weight:700;color:#8b7d72}
+.rs i{display:flex;width:28px;height:28px;margin:0 auto 6px;border-radius:50%;align-items:center;justify-content:center;background:#fff;border:2px solid #e3d6cc;font-style:normal;font-size:13px;position:relative;z-index:1;color:#a89a8f}
+.rs::before{content:"";position:absolute;top:13px;left:-50%;width:100%;height:3px;background:#e3d6cc;z-index:0}
+.rs:first-child::before{display:none}
+.rs.on{color:#211710}
+.rs.on::before{background:var(--c)}
+.rs.on i{background:var(--c);border-color:var(--c);color:#211710}
+.rs.cur i{box-shadow:0 0 0 5px var(--r)}
+.rlogo{display:block;width:64px;height:64px;margin:0 auto 8px;border-radius:50%;background:#fff;padding:5px;object-fit:contain}
+.lgbtn{display:inline-block;margin-top:12px;font-size:12px;font-weight:600;text-decoration:underline;cursor:pointer;opacity:.9}
+/* sync + auth */
+.foot{margin:26px 0 0;text-align:center;font-size:12.5px;color:var(--soft)}
+.foot a{color:var(--ink);font-weight:700;text-decoration:underline;cursor:pointer}
+#auth{z-index:60}
+.acard{max-width:380px;margin:6vh auto 0}
+.acard h1{font-size:32px;text-align:center}
+.acard p{text-align:center;color:var(--soft);font-size:13.5px;margin:6px 0 16px}
+.acard .f2{margin-bottom:12px}
+.acard .row{display:flex;gap:10px;margin-top:6px}
+.acard .row .btn{flex:1}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--coral);color:#211710;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:700;z-index:80;max-width:90%;display:none;text-align:center}
+.aerr{color:var(--late);font-size:13px;font-weight:600;text-align:center;min-height:20px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>Kanaka Space Task Tracker</h1><button class="btn" id="addBtn">+ Order Baru</button></div>
+
+  <div class="card">
+    <div class="prog-top"><div class="big" id="bigNum">0<small>/0 terkirim</small></div><div class="msg" id="msg"></div></div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="stats">
+      <div class="stat"><b id="s0">0</b><span>Pembayaran</span></div>
+      <div class="stat"><b id="s1">0</b><span>Diproses</span></div>
+      <div class="stat"><b id="s2">0</b><span>Terkirim</span></div>
+      <div class="stat warn"><b id="sTelat">0</b><span>Telat</span></div>
+    </div>
+  </div>
+
+  <div class="card" id="formBox">
+    <div class="grid">
+      <div><label class="f" for="fPhone" id="lPhone">4 angka terakhir nomor HP klien</label><input type="text" id="fPhone" inputmode="numeric" maxlength="4" placeholder="Tambahkan 4 angka terakhir" autocomplete="off"></div>
+      <div><label class="f" for="fSvc">Layanan</label><select id="fSvc"></select></div>
+      
+      <div class="full" id="wPkg"><label class="f" for="fPkg">Paket</label><select id="fPkg"></select></div>
+      <div class="full" id="wOtherPrice" hidden><label class="f" for="fOtherPrice">Harga (Rp)</label><input type="text" id="fOtherPrice" inputmode="numeric" placeholder="angka saja" autocomplete="off"><label class="chk mini"><input type="checkbox" id="fTbd">Belum ada harga pasti</label></div>
+      <div class="full"><label class="f">Upgrade</label><div class="ups" id="fUps"></div></div>
+      <div><label class="f" for="fOd">Tanggal order</label><input type="date" id="fOd"></div>
+      <div><label class="f" for="fDl">Deadline</label><input type="date" id="fDl"></div>
+      <div id="wPrice"><label class="f" for="fPrice">Harga (Rp)</label><input type="number" id="fPrice" inputmode="numeric" step="1000"></div>
+      <div class="full"><label class="f" for="fNote">Catatan (opsional)</label><textarea id="fNote" rows="3" placeholder="Catatan untuk klien"></textarea></div>
+    </div>
+    <div class="form-actions"><button class="btn" id="saveBtn">Simpan untuk Pembayaran</button><button class="btn ghost" id="cancelBtn">Batal</button><span class="tot" id="fTot"></span></div>
+  </div>
+
+  <div class="filters" id="filters">
+    <button class="fl on" data-f="all">Semua</button><button class="fl" data-f="0">Pembayaran</button><button class="fl" data-f="1">Diproses</button><button class="fl" data-f="2">Terkirim</button>
+  </div>
+  <div id="list"></div>
+  <p class="foot"><span id="sync">Mode lokal</span> · <a id="outBtn">Masuk</a></p>
+</div>
+
+<div class="ov" id="ov"><div id="ovIn"></div></div>
+
+<div class="ov" id="auth"><button class="xbtn" id="aX" aria-label="Tutup">✕</button><div class="acard card">
+  <h1>Kanaka Space</h1>
+  <p>Masuk supaya order tersinkron di semua device.</p>
+  <div class="f2"><label class="f" for="aEmail">Email</label><input type="email" id="aEmail" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+  <div class="f2"><label class="f" for="aPass">Password</label><input type="password" id="aPass" autocomplete="current-password"><label class="chk mini"><input type="checkbox" id="aShow">Tampilkan password</label></div>
+  <div class="row"><button class="btn" id="aIn">Masuk</button></div>
+  <div class="aerr" id="aErr"></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+<button class="btn fab" id="fabBtn">+ Order Baru</button>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-auth-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-firestore-compat.min.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCaFrxkFf1IlseBlcJzHn21kGGAfg70UI8",
+  authDomain: "kanaka-space-task-tracker.firebaseapp.com",
+  projectId: "kanaka-space-task-tracker",
+  storageBucket: "kanaka-space-task-tracker.firebasestorage.app",
+  messagingSenderId: "592676225904",
+  appId: "1:592676225904:web:6bffeb876671caba8a45b5",
+  measurementId: "G-BEPCYVBVK7"
+};
+const TQ=[["Tarot 1 pertanyaan",35000],["Tarot 2 pertanyaan",65000],["Tarot 3 pertanyaan",100000],["Tarot 4 pertanyaan",135000],["Tarot 5 pertanyaan",155000]].map(x=>[x[0],x[1],"tarot"]);
+const QK=["Quick Reading: 24 jam",35000,"quick"];
+const AST_UP=[...TQ,QK];
+const TIERS=[["Full Reading",185000],["Deep Reading",155000],["PDF Report",125000],["Plus Reading",75000],["Basic Reading",55000]];
+const topic=n=>({name:n,opts:TIERS,ups:AST_UP,dl:3});
+const SERVICES=[
+ {name:"Astrology Questions",opts:[["1 Question",55000],["2 Questions",105000],["3 Questions",155000],["4 Questions",185000],["5 Questions",205000]],ups:AST_UP,dl:3},
+ topic("About Me"),topic("About Them"),topic("About Us / Synastry"),topic("Your Soulmate"),topic("Career"),topic("Money"),topic("Life Purpose"),topic("What They Think About Me"),
+ {name:"Birthday Reading",opts:[["Birthday Reading",155000]],ups:AST_UP,dl:3},
+ {name:"Next 12 Months",opts:[["Personal",195000],["Couple",220000]],ups:[["Tarot 12 bulan",50000],QK],dl:3},
+ {name:"Your Future Baby",opts:[["Future Baby Reading",125000]],ups:AST_UP,dl:3},
+ {name:"Family & Marriage",opts:[["Ayah + Ibu + 1 Anak",155000]],ups:[["Tambah 1 anak",55000],...TQ,QK],dl:3},
+ {name:"Tarot",opts:[["Yes / No",18000],["1 Question",35000],["2 Questions",65000],["3 Questions",100000],["4 Questions",135000],["5 Questions",155000]],ups:[["Oracle",15000],QK],dl:3},
+ {name:"Video Call (GMeet)",opts:[["Premium Personal",250000],["Reading Berdua",150000]],ups:[["Tarot",75000]],dl:0},
+ {name:"Tatap Muka",opts:[["Premium Personal",350000],["Berdua (per orang)",245000],["Bertiga (per orang)",200000]],ups:[["Transport",150000],["Tarot",100000]],dl:0},
+ {name:"Other",other:true,opts:[],ups:AST_UP,dl:3}
+];
+const KEY="kanaka-tasks-v2",DAY=864e5;
+const MOBILE=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const SAVE_LABEL=MOBILE?"Simpan ke Foto":"Download Gambar";
+const LOGO_URL="https://i.imgur.com/ghqauwY.png";
+const LOGO_KEY="kanaka-logo-v1";let logo="";try{logo=localStorage.getItem(LOGO_KEY)||""}catch(e){}
+let orders=[],filter="all";
+try{orders=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){orders=[]}
+const $=id=>document.getElementById(id);
+let toastT=null;
+function toast(m){const t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(toastT);toastT=setTimeout(()=>{t.style.display="none"},7000)}
+
+/* ---------- Firebase sync: lapisan tipis, kode UI tetap seperti awal ---------- */
+let auth=null,db=null,col=null,unsub=null,user=null,asked=false,synced={};
+const sig=o=>JSON.stringify(Object.keys(o).sort().map(k=>[k,o[k]]));
+const PK="kanaka-pend";
+const getPend=()=>{try{return new Set(JSON.parse(localStorage.getItem(PK)||"[]"))}catch(e){return new Set()}};
+const setPend=p=>{try{localStorage.setItem(PK,JSON.stringify([...p]))}catch(e){}};
+try{
+  firebase.initializeApp(firebaseConfig);
+  auth=firebase.auth();db=firebase.firestore();
+  db.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+}catch(e){auth=null;db=null}
+const cache=()=>{try{localStorage.setItem(KEY,JSON.stringify(orders))}catch(e){}};
+function push(){
+  if(!col)return;
+  const cur=new Set();
+  orders.forEach(o=>{cur.add(o.id);const g=sig(o);if(synced[o.id]!==g){synced[o.id]=g;col.doc(o.id).set(JSON.parse(JSON.stringify(o))).catch(err=>{delete synced[o.id];$("sync").textContent="Gagal menyimpan ke cloud";toast("Gagal simpan ke cloud: "+(err.code||err.message))})}});
+  Object.keys(synced).forEach(id=>{if(!cur.has(id)){delete synced[id];col.doc(id).delete().catch(()=>{})}});
+}
+const save=()=>{cache();if(col)push();else{const p=getPend();orders.forEach(o=>p.add(o.id));setPend(p)}};
+const openAuth=()=>{$("auth").classList.add("open");setTimeout(()=>$("aEmail").focus(),50)};
+const closeAuth=()=>$("auth").classList.remove("open");
+const AERR={"auth/invalid-credential":"Email atau password salah","auth/wrong-password":"Email atau password salah","auth/user-not-found":"Akun belum dibuat di Firebase Console","auth/invalid-email":"Format email tidak valid","auth/network-request-failed":"Tidak ada koneksi internet","auth/operation-not-allowed":"Aktifkan Email/Password di Firebase Console","auth/too-many-requests":"Terlalu banyak percobaan, coba lagi nanti"};
+function doAuth(){
+  const e=$("aEmail").value.trim(),p=$("aPass").value;$("aErr").textContent="";
+  if(!auth){$("aErr").textContent="Firebase tidak terhubung";return}
+  if(!e||!p){$("aErr").textContent="Isi email dan password";return}
+  $("aIn").disabled=true;
+  auth.signInWithEmailAndPassword(e,p)
+    .catch(err=>{$("aErr").textContent=AERR[err.code]||err.message})
+    .finally(()=>{$("aIn").disabled=false});
+}
+$("aIn").onclick=doAuth;
+$("aX").onclick=closeAuth;
+$("auth").addEventListener("click",e=>{if(e.target===$("auth"))closeAuth()});
+$("aShow").onchange=e=>{$("aPass").type=e.target.checked?"text":"password"};
+$("aPass").addEventListener("keydown",e=>{if(e.key==="Enter")doAuth()});
+$("outBtn").onclick=()=>{if(!auth){toast("Firebase tidak terhubung");return}user?auth.signOut():openAuth()};
+if(!auth){$("sync").textContent="Mode lokal (Firebase tidak terhubung)";$("outBtn").style.display="none"}
+else auth.onAuthStateChanged(u=>{
+  user=u;
+  if(unsub){unsub();unsub=null}
+  if(!u){
+    col=null;synced={};const p=getPend();orders=orders.filter(o=>p.has(o.id));cache();render();
+    $("outBtn").textContent="Masuk";$("sync").textContent="Belum tersinkron";
+    if(!asked){asked=true;openAuth()}
+    return;
+  }
+  closeAuth();$("aPass").value="";$("outBtn").textContent="Keluar";$("sync").textContent="Menyinkronkan…";
+  col=db.collection("users").doc(u.uid).collection("orders");
+  let first=true;
+  unsub=col.onSnapshot(snap=>{
+    const cloud=snap.docs.map(d=>d.data());
+    synced={};snap.docs.forEach(d=>{synced[d.id]=sig(d.data())});
+    if(first){
+      first=false;
+      const ids=new Set(cloud.map(o=>o.id)),p=getPend(),mk="kanaka-migrated-"+u.uid;let done=null;try{done=localStorage.getItem(mk)}catch(e){}
+      orders.forEach(o=>{if(!ids.has(o.id)&&(p.has(o.id)||!done))cloud.push(o)});
+      setPend(new Set());try{localStorage.setItem(mk,"1")}catch(e){}
+    }
+    orders=cloud;cache();render();push();
+    $("sync").textContent=(snap.metadata.fromCache?"Offline, tersimpan di device":"Tersinkron")+" · "+u.email;
+  },err=>{$("sync").textContent="Gagal sinkron: "+(err.code||"");toast("Gagal sinkron: "+(err.code||err.message))});
+});
+
+const rp=n=>(n<0?"-":"")+"Rp"+Math.abs(n||0).toLocaleString("id-ID");
+const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const today=()=>iso(new Date());
+const addDays=(s,n)=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);return iso(d)};
+const diff=(a,b)=>Math.round((new Date(a+"T00:00:00")-new Date(b+"T00:00:00"))/DAY);
+const fmtD=s=>new Date(s+"T00:00:00").toLocaleDateString("id-ID",{day:"numeric",month:"short"});
+const fmtL=s=>new Date(s+"T00:00:00").toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"});
+const prune=()=>{const n=orders.length;orders=orders.filter(o=>!(o.sentAt&&Date.now()-o.sentAt>30*DAY));if(orders.length!==n)save()};
+
+let priceManual=false,dlManual=false,lastOther=false;
+const curSvc=()=>SERVICES[$("fSvc").value];
+$("fSvc").innerHTML=SERVICES.map((s,i)=>`<option value="${i}">${s.name}</option>`).join("");
+function fillPkg(){
+  const s=curSvc();
+  $("wOtherPrice").hidden=!s.other;
+  if(s.other!==lastOther){lastOther=s.other;$("fPhone").value=""}
+  $("lPhone").textContent=s.other?"Judul Orderan":"4 angka terakhir nomor HP klien";
+  $("fPhone").placeholder=s.other?"Judul orderan":"Tambahkan 4 angka terakhir";
+  $("fPhone").inputMode=s.other?"text":"numeric";
+  if(s.other)$("fPhone").removeAttribute("maxlength");else $("fPhone").maxLength=4;
+  $("wPkg").hidden=$("wPrice").hidden=!!s.other;
+  if(!s.other)$("fPkg").innerHTML=s.opts.map((o,i)=>`<option value="${i}">${o[0]} – ${rp(o[1])}</option>`).join("");
+  $("fUps").innerHTML=s.ups.map((u,i)=>`<label class="chk"><input type="checkbox" data-i="${i}">${u[0]} +${rp(u[1])}</label>`).join("");
+  $("fUps").querySelectorAll("input").forEach(c=>c.addEventListener("change",()=>{
+    if(c.checked&&s.ups[c.dataset.i][2]==="tarot")$("fUps").querySelectorAll("input").forEach(x=>{if(x!==c&&s.ups[x.dataset.i][2]==="tarot")x.checked=false});
+    recalc();
+  }));
+  recalc(true);
+}
+function calc(){
+  const s=curSvc(),base=s.other?(+$("fOtherPrice").value||0):s.opts[$("fPkg").value||0][1];
+  let sum=base,quick=false;
+  $("fUps").querySelectorAll("input:checked").forEach(c=>{const u=s.ups[c.dataset.i];sum+=u[1];if(u[2]==="quick")quick=true});
+  return{s,base,sum,quick};
+}
+function recalc(force){
+  const {s,sum,quick}=calc();
+  if(force===true)priceManual=false;
+  if(!priceManual)$("fPrice").value=sum;
+  if(!dlManual||force===true){if(force===true)dlManual=false;$("fDl").value=addDays($("fOd").value||today(),quick?1:s.dl)}
+  $("fTot").textContent=s.other&&$("fTbd").checked?"Harga menyusul":rp(s.other?sum:(+$("fPrice").value||0));
+}
+$("fSvc").addEventListener("change",fillPkg);
+$("fPkg").addEventListener("change",()=>recalc(true));
+$("fOd").addEventListener("change",()=>{dlManual=false;recalc()});
+$("fDl").addEventListener("change",()=>{dlManual=true});
+$("fPrice").addEventListener("input",()=>{priceManual=true;recalc()});
+$("fOtherPrice").addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"");recalc()});
+$("fPhone").addEventListener("input",e=>{if(!curSvc().other)e.target.value=e.target.value.replace(/\D/g,"").slice(0,4)});
+$("fTbd").addEventListener("change",()=>{$("fOtherPrice").disabled=$("fTbd").checked;if($("fTbd").checked)$("fOtherPrice").value="";recalc()});
+function openForm(){
+  $("formBox").classList.add("open");document.body.classList.add("fo");
+  ["fPhone","fNote","fOtherPrice"].forEach(i=>$(i).value="");
+  $("fTbd").checked=false;$("fOtherPrice").disabled=false;
+  $("fOd").value=today();priceManual=false;dlManual=false;fillPkg();
+  $("fPhone").focus();$("formBox").scrollIntoView({behavior:"smooth",block:"center"});
+}
+const closeForm=()=>{$("formBox").classList.remove("open");document.body.classList.remove("fo")};
+$("addBtn").onclick=$("fabBtn").onclick=()=>$("formBox").classList.contains("open")?closeForm():openForm();
+$("cancelBtn").onclick=closeForm;
+
+function bad(id){$(id).focus();$(id).style.borderColor="var(--late)";setTimeout(()=>$(id).style.borderColor="",1800)}
+function doSave(){
+  const ph=$("fPhone").value.trim();
+  if(curSvc().other?!ph:ph.length!==4)return bad("fPhone");
+  const {s,base,sum}=calc();
+  
+  const tbd=!!(s.other&&$("fTbd").checked);
+  const odate=$("fOd").value||today();
+  const ups=[...$("fUps").querySelectorAll("input:checked")].map(c=>({n:s.ups[c.dataset.i][0],p:s.ups[c.dataset.i][1]}));
+  const price=tbd?0:(s.other?sum:(+$("fPrice").value||0));
+  const code=s.other?ph.replace(/[^A-Za-z0-9]/g,"").slice(0,4).toUpperCase():ph;
+  if(!code)return bad("fPhone");
+  const pre=odate.slice(2,4)+odate.slice(5,7)+odate.slice(8,10)+code;
+  let seq=0;orders.forEach(o=>{if(o.id.startsWith(pre)){const n=parseInt(o.id.slice(pre.length));if(n>seq)seq=n}});
+  const o={id:pre+(seq+1),ph:s.other?"":ph,title:s.other?ph:"",svc:s.other?ph:s.name,pkg:s.other?"Custom":s.opts[$("fPkg").value][0],base,ups,price,tbd,odate,dl:$("fDl").value||today(),stage:0,sentAt:null,note:$("fNote").value.trim()};
+  orders.push(o);save();closeForm();render();showReceipt(o.id);
+}
+$("saveBtn").onclick=()=>{try{doSave()}catch(e){toast("Error: "+e.message)}};
+
+$("filters").addEventListener("click",e=>{const b=e.target.closest(".fl");if(!b)return;filter=b.dataset.f;document.querySelectorAll(".fl").forEach(x=>x.classList.toggle("on",x===b));render()});
+$("list").addEventListener("click",e=>{
+  const row=e.target.closest(".order");if(!row)return;
+  const o=orders.find(x=>x.id===row.dataset.id);if(!o)return;
+  const t=e.target;
+  if(t.classList.contains("st")){o.stage=+t.dataset.s;o.sentAt=o.stage===2?Date.now():null;save();render()}
+  else if(t.classList.contains("rcb"))showReceipt(o.id);
+  else if(t.classList.contains("del")){
+    if(t.classList.contains("sure")){orders=orders.filter(x=>x!==o);save();render()}
+    else{t.classList.add("sure");t.textContent="Yakin hapus?";setTimeout(()=>{t.classList.remove("sure");t.textContent="Hapus"},2500)}
+  }
+});
+
+function showReceipt(id){
+  const o=orders.find(x=>x.id===id);if(!o)return;
+  const rows=[`<div class="rrow"><span>${o.pkg==="Custom"?"Biaya layanan":esc(o.pkg)}</span><b>${o.tbd?"Menyusul":rp(o.base)}</b></div>`];
+  o.ups.forEach(u=>rows.push(`<div class="rrow"><span>${esc(u.n)}</span><b>${rp(u.p)}</b></div>`));
+  const sum=o.base+o.ups.reduce((a,u)=>a+u.p,0);
+  if(!o.tbd&&o.price!==sum)rows.push(`<div class="rrow"><span>Penyesuaian</span><b>${rp(o.price-sum)}</b></div>`);
+  $("ovIn").innerHTML=`<button class="xbtn" id="ovX" aria-label="Tutup">✕</button><div class="rcard"><div class="rhead"><img class="rlogo" src="${LOGO_URL}" crossorigin="anonymous" alt="" onerror="this.onerror=null;if(logo)this.src=logo;else this.remove()"><h2>Kanaka Space</h2><p>Konfirmasi Pesanan &amp; Harga</p></div><div class="rbody">
+  <div class="rid"><small>ORDER ID</small><b>${o.id}</b></div>
+  ${statusHtml(o.stage)}
+  <div class="rrow"><span>Tanggal order</span><b>${fmtL(o.odate)}</b></div>
+  ${o.title?`<div class="rrow"><span>Judul orderan</span><b>${esc(o.title)}</b></div>`:`<div class="rrow"><span>No. HP</span><b>••••${o.ph}</b></div>`}
+  <div class="rrow"><span>Layanan</span><b>${esc(o.pkg==="Custom"?"Other":o.svc)}</b></div>
+  ${rows.join("")}
+  <div class="rrow"><span>Estimasi hasil</span><b>${fmtL(o.dl)}</b></div>
+  ${o.note?`<div class="rrow"><span>Catatan</span><b>${esc(o.note)}</b></div>`:""}
+  <div class="rtot"><span>Total</span><b>${o.tbd?"Menyusul":rp(o.price)}</b></div>
+  <p class="rfoot">Mohon cek kembali detail pesanan sebelum melakukan pembayaran.<br><b>@kanakaspace | +62878 2658 4334 | kanakaspace@gmail.com</b></p></div></div>
+  <div class="ov-actions">Simpan gambar kartu di atas untuk dikirim ke klien<br><button class="btn" id="ovSave">${SAVE_LABEL}</button></div>`;
+  $("ov").classList.add("open");$("ov").scrollTop=0;document.body.style.overflow="hidden";
+  $("ovX").onclick=closeOv;
+  $("ovSave").onclick=()=>saveImg(o);
+}
+const STG=[{n:"Pembayaran",m:"Menunggu pembayaran",c:"#f6d143",r:"rgba(246,209,67,.38)",bg:"#fff4cf",tx:"#6b5300"},{n:"Diproses",m:"Pesanan sedang diproses",c:"#fcb45f",r:"rgba(252,180,95,.38)",bg:"#ffe9d0",tx:"#7a4410"},{n:"Terkirim",m:"Pesanan sudah terkirim",c:"#ff8078",r:"rgba(255,128,120,.35)",bg:"#ffe1dd",tx:"#8a2f29"}];
+function statusHtml(s){const cur=STG[s];return `<div class="rstat" style="background:${cur.bg};color:${cur.tx}"><div class="rpill">${cur.m}</div><div class="rsteps">${STG.map((g,i)=>`<div class="rs ${i<=s?"on":""} ${i===s?"cur":""}" style="--c:${g.c};--r:${g.r}"><i>${i<s||(s===2&&i===2)?"✓":i+1}</i>${g.n}</div>`).join("")}</div></div>`}
+function setLogo(f,id){if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,320/Math.max(im.width,im.height)),cv=document.createElement("canvas");cv.width=Math.round(im.width*s);cv.height=Math.round(im.height*s);cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);logo=cv.toDataURL("image/png");try{localStorage.setItem(LOGO_KEY,logo)}catch(e){}showReceipt(id)};im.src=r.result};r.readAsDataURL(f)}
+function closeOv(){$("ov").classList.remove("open");document.body.style.overflow=""}
+function showImg(u){const c=document.querySelector("#ovIn .rcard");if(c)c.outerHTML=`<img src="${u}" alt="Konfirmasi pesanan" style="display:block;width:100%;max-width:380px;margin:0 auto;border-radius:24px"><p style="max-width:380px;margin:10px auto 0;text-align:center;color:#fff;font-size:12.5px">Tahan lama gambar, lalu pilih Simpan ke Foto.</p>`}
+async function saveImg(o){
+  const b=$("ovSave"),card=document.querySelector("#ovIn .rcard");
+  if(!card)return;
+  b.disabled=true;b.textContent="Memproses...";
+  try{
+    const cv=await html2canvas(card,{scale:3,backgroundColor:null,useCORS:true});
+    const blob=await new Promise(r=>cv.toBlob(r,"image/png"));
+    const name="Kanaka Space "+o.id+".png";
+    if(MOBILE&&window.File&&navigator.canShare&&navigator.share){
+      try{const f=new File([blob],name,{type:"image/png"});if(navigator.canShare({files:[f]})){await navigator.share({files:[f]});b.textContent=SAVE_LABEL;b.disabled=false;return}}
+      catch(e){if(e&&e.name==="AbortError"){b.textContent=SAVE_LABEL;b.disabled=false;return}}
+    }
+    let dl=null;try{dl=window.claude&&await window.claude.use("downloads")}catch(e){}
+    if(dl){
+      try{await dl.save({filename:name,data:blob})}
+      catch(err){if(!(err&&err.code==="declined"))showImg(cv.toDataURL("image/png"))}
+    }else{
+      if(MOBILE)showImg(cv.toDataURL("image/png"));
+      else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+    }
+    b.textContent=SAVE_LABEL;
+  }catch(e){b.textContent="Gagal, coba screenshot";setTimeout(()=>{b.textContent=SAVE_LABEL},2500)}
+  b.disabled=false;
+}
+$("ov").addEventListener("click",e=>{if(e.target===$("ov"))closeOv()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeOv()});
+
+function render(){
+  prune();
+  const t=today(),total=orders.length,c=[0,1,2].map(i=>orders.filter(o=>o.stage===i).length);
+  const pct=total?Math.round(c[2]/total*100):0;
+  $("bigNum").innerHTML=`${c[2]}<small>/${total} terkirim</small>`;
+  $("barFill").style.width=pct+"%";
+  $("msg").textContent=!total?"Belum ada order. Tambah yang pertama!":pct===100?"Semua terkirim! Waktunya istirahat :)":pct>=70?"Udah banyak yang terkirim, dikit lagi!":pct>=40?"Lumayan, lanjut terus ya":"Masih banyak yang belum selesai";
+  c.forEach((n,i)=>$("s"+i).textContent=n);
+  $("sTelat").textContent=orders.filter(o=>o.stage<2&&diff(o.dl,t)<0).length;
+  let rows=orders.filter(o=>filter==="all"||o.stage===+filter);
+  rows.sort((a,b)=>(a.stage===2)-(b.stage===2)||(a.stage===2?b.sentAt-a.sentAt:a.dl.localeCompare(b.dl)));
+  if(!rows.length){$("list").innerHTML=`<div class="empty">${total?"Tidak ada order di filter ini.":"Klik “+ Order Baru” buat mulai."}</div>`;return}
+  const L=["Pembayaran","Diproses","Terkirim"];
+  $("list").innerHTML=rows.map(o=>{
+    const d=diff(o.dl,t),fin=o.stage===2;
+    const k=fin?"done":d<0?"late":d===0?"today":"";
+    const lbl=fin?`Terkirim · hapus ${Math.max(1,Math.ceil(30-(Date.now()-o.sentAt)/DAY))} hari lagi`:d<0?`Telat ${-d} hari · ${fmtD(o.dl)}`:d===0?"Deadline hari ini":d===1?`Besok · ${fmtD(o.dl)}`:`${d} hari lagi · ${fmtD(o.dl)}`;
+    return `<div class="order ${k} s${o.stage}" data-id="${o.id}"><div class="ob">
+      <div class="oid">#${o.id}${o.title?"":`<span>HP ••••${o.ph}</span>`}</div>
+      <div class="nm">${esc(o.svc)}</div>
+      <div class="sv">${esc(o.pkg)}${o.ups.length?" + "+esc(o.ups.map(u=>u.n).join(", ")):""}</div>
+      <div class="chips"><span class="chip ${fin?"":k}">${lbl}</span><span class="chip">Order ${fmtD(o.odate)}</span><span class="chip">${o.tbd?"Harga menyusul":rp(o.price)}</span></div>
+      <div class="steps">${L.map((n,i)=>`<button class="st ${i<o.stage?"past":""} ${i===o.stage?"cur":""} ${i===o.stage&&i===2?"last":""}" data-s="${i}">${i<o.stage?"✓ ":""}${n}</button>`).join("")}</div>
+      ${o.note?`<div class="note">${esc(o.note)}</div>`:""}</div>
+      <div class="right"><button class="rcb">Rincian</button><button class="del">Hapus</button></div></div>`;
+  }).join("");
+}
+render();
+</script>
+</body>
+</html>
